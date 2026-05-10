@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Solicitud de Código Pepsi · CBC</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root {
+  --bg:#f0f4fa; --surface:#ffffff; --surface2:#e8edf5; --border:#d0d9e8;
+  --accent:#0a4fc4; --accent2:#1a6eff; --accent-glow:rgba(26,110,255,0.18);
+  --text:#0d1b3e; --text2:#4a5a7a; --text3:#8a99bb;
+  --success:#00c97a; --error:#ff3b5c; --warn:#ff9b1a;
+  --card-shadow:0 4px 24px rgba(10,79,196,0.10);
+  --radius:18px; --radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:0 0 40px;}
+.app{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#061a4a 0%,#0a4fc4 60%,#1a6eff 100%);padding:48px 24px 56px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.06);top:-60px;right:-60px;}
+.header::after{content:'';position:absolute;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.04);bottom:-30px;left:30px;}
+.header-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;position:relative;z-index:1;}
+.logo-icon{width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.logo-name{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.9);letter-spacing:0.05em;text-transform:uppercase;}
+.header-title{font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:8px;position:relative;z-index:1;}
+.header-sub{font-size:14px;color:rgba(255,255,255,0.65);position:relative;z-index:1;}
+
+/* STEPPER */
+.stepper-wrap{padding:0 24px;margin-top:-20px;margin-bottom:8px;position:relative;z-index:10;}
+.stepper{background:var(--surface);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;transition:background 0.4s;}
+.step-item.done:not(:last-child)::after,.step-item.active:not(:last-child)::after{background:var(--accent);}
+.step-dot{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;color:var(--text3);position:relative;z-index:1;transition:all 0.3s;}
+.step-item.active .step-dot{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 4px var(--accent-glow);}
+.step-item.done .step-dot{background:var(--success);border-color:var(--success);color:#fff;}
+.step-label{font-size:10px;font-weight:500;color:var(--text3);text-align:center;line-height:1.2;transition:color 0.3s;}
+.step-item.active .step-label{color:var(--accent);font-weight:600;}
+.step-item.done .step-label{color:var(--success);}
+
+/* FORM */
+.form-content{padding:16px 24px 0;flex:1;}
+.section-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:22px 20px;margin-bottom:16px;animation:slideUp 0.4s ease both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.section-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0a4fc4,#1a6eff);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:var(--text);}
+.section-subtitle{font-size:12px;color:var(--text3);margin-top:1px;}
+
+/* FIELDS */
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;}
+label span.req{color:var(--accent);margin-left:2px;}
+input[type=text],input[type=email],input[type=tel],input[type=number]{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border 0.25s,box-shadow 0.25s,background 0.2s;-webkit-appearance:none;appearance:none;}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);background:#fff;}
+input.error{border-color:var(--error);box-shadow:0 0 0 3px rgba(255,59,92,0.10);}
+.field-error{font-size:11px;color:var(--error);margin-top:5px;display:none;align-items:center;gap:4px;}
+.field-error.show{display:flex;}
+
+/* GEO */
+.geo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.geo-btn{width:100%;background:linear-gradient(135deg,#0a4fc4,#1a6eff);color:#fff;border:none;border-radius:var(--radius-sm);padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s,transform 0.15s;letter-spacing:0.01em;}
+.geo-btn:active{transform:scale(0.98);opacity:0.9;}
+.geo-btn:disabled{opacity:0.6;cursor:not-allowed;}
+.geo-status{display:none;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;margin-top:8px;}
+.geo-status.success{background:rgba(0,201,122,0.10);color:var(--success);display:flex;}
+.geo-status.warn{background:rgba(255,155,26,0.10);color:var(--warn);display:flex;}
+.geo-status.error{background:rgba(255,59,92,0.10);color:var(--error);display:flex;}
+.geo-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;}
+.geo-divider-line{flex:1;height:1px;background:var(--border);}
+.geo-divider-label{font-size:11px;color:var(--text3);font-weight:500;white-space:nowrap;}
+.geo-hint{background:rgba(10,79,196,0.06);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.7;}
+.geo-hint a{color:var(--accent);font-weight:600;text-decoration:none;}
+
+/* BILLING */
+.billing-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.billing-opt{position:relative;cursor:pointer;}
+.billing-opt input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
+.billing-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--bg);transition:all 0.25s;text-align:center;}
+.billing-card-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;transition:background 0.25s;}
+.billing-card-label{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--text2);transition:color 0.25s;line-height:1.3;}
+.billing-card-desc{font-size:11px;color:var(--text3);line-height:1.3;}
+.billing-opt input:checked + .billing-card{border-color:var(--accent);background:rgba(10,79,196,0.05);box-shadow:0 0 0 3px var(--accent-glow);}
+.billing-opt input:checked + .billing-card .billing-card-icon{background:linear-gradient(135deg,#0a4fc4,#1a6eff);}
+.billing-opt input:checked + .billing-card .billing-card-label{color:var(--accent);}
+
+/* UPLOAD */
+.doc-type-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(10,79,196,0.09);color:var(--accent);font-size:12px;font-weight:600;border-radius:20px;padding:4px 12px;margin-bottom:12px;}
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:28px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.25s;background:var(--bg);text-align:center;position:relative;}
+.upload-area:hover,.upload-area.drag{border-color:var(--accent);background:rgba(10,79,196,0.04);}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{width:44px;height:44px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;}
+.upload-label{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--text);}
+.upload-sublabel{font-size:11px;color:var(--text3);}
+.file-preview{display:none;align-items:center;gap:12px;background:var(--bg);border-radius:var(--radius-sm);padding:12px 14px;border:1.5px solid var(--border);margin-top:10px;}
+.file-preview.show{display:flex;}
+.file-icon-wrap{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#0a4fc4,#1a6eff);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.file-info{flex:1;overflow:hidden;}
+.file-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-size{font-size:11px;color:var(--text3);}
+.file-remove{background:none;border:none;color:var(--error);cursor:pointer;padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+.file-remove:hover{background:rgba(255,59,92,0.1);}
+
+/* SUBMIT */
+.submit-wrap{padding:8px 24px 32px;}
+.btn-submit{width:100%;background:linear-gradient(135deg,#061a4a 0%,#0a4fc4 50%,#1a6eff 100%);color:#fff;border:none;border-radius:var(--radius);padding:16px;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;box-shadow:0 8px 24px rgba(10,79,196,0.35);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
+.btn-submit:active{transform:scale(0.98);}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);transform:translateX(-100%);animation:shimmer 2.5s infinite;}
+@keyframes shimmer{100%{transform:translateX(100%);}}
+.btn-back{flex:0 0 auto;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.2s;}
+.btn-back:active{background:var(--surface2);}
+
+/* SUCCESS */
+.success-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 32px;text-align:center;animation:fadeIn 0.5s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.success-screen.show{display:flex;}
+.success-anim{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#00c97a,#00a060);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 16px rgba(0,201,122,0.12);margin-bottom:28px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.success-title{font-family:'Sora',sans-serif;font-size:24px;font-weight:700;color:var(--text);margin-bottom:12px;}
+.success-msg{font-size:14px;color:var(--text2);line-height:1.6;max-width:300px;}
+.success-ref{margin-top:24px;background:var(--surface);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--card-shadow);width:100%;text-align:left;}
+.success-ref-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:4px;}
+.success-ref-val{font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:var(--accent);}
+
+/* MAP */
+#mapContainer{width:100%;height:260px;border-radius:var(--radius-sm);overflow:hidden;border:1.5px solid var(--border);margin-bottom:12px;position:relative;}
+#mapContainer.has-pin{border-color:var(--accent);}
+.map-instruction{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(6,26,74,0.82);color:#fff;font-size:12px;font-weight:500;padding:7px 14px;border-radius:20px;z-index:500;pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px);}
+.map-coords-bar{display:flex;gap:8px;margin-bottom:10px;}
+.map-coord-pill{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;text-align:center;}
+.map-coord-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+.map-coord-val{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-top:2px;}
+.map-coord-pill.active{border-color:var(--accent);background:rgba(10,79,196,0.05);}
+.map-coord-pill.active .map-coord-val{color:var(--accent);}
+
+.spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0d1b3e;color:#fff;border-radius:12px;padding:12px 20px;font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.25);opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:999;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-anim">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="success-title">¡Solicitud enviada!</div>
+    <div class="success-msg">Información enviada correctamente. Revisaremos los datos proporcionados y te contactaremos si necesitamos información adicional.</div>
+    <div class="success-ref">
+      <div class="success-ref-label">Número de referencia</div>
+      <div class="success-ref-val" id="refNumber">—</div>
+    </div>
+  </div>
+
+  <!-- MAIN FORM -->
+  <div id="mainForm">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-logo">
+        <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABkAUADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5/ooooAKKKKACiiigAoqeKxu50DQ2s0inoUjJH6VMNH1MoHGn3W09/Jb/AAp8rfQh1IrdlKip4LK6urxLS3tpZbl22rCiEuT6ADmt1fh/4uZcjw9qAHvCR/OkWc3RW9L4K8TQf6zRL0f9siav+DdE0/UNRu7TVrebz48BIzuXB5zux07VFSfJHmtf0Lpw9pJRul5vY5KivX/+EA0VuTAqL6bpK4LxjpWn6RqqW+nk7QnzqSxw2fcdMYrKnX53bla9UdNfCKlHmVSMvJPX8jnakEEpGRG5B77TWh4ds577XrOOC0uLpllV2it4TK5AOT8or3C88GzTRW8jzXcJZfnjezclD+H+FXVqOC0VzycRXnSaUY3v5nz4yMv3lI+opK9d8beCp7DSZDaQ6jqAKBzJFYOAhz/FnoMd68kRQZFVjtBOCSM4p05uau1Y0o1JVI3krD47W4lGY4JXHqqE0S2txB/roJI/99CP513t9q1qb6D7PqAa1aBNpXPykDByMjHIyB6EVNd+I7K40q+tZZmVZICikhmDNjjjJPbrXYoUGre019GU/bLXk09Ueb1YisbudN8VrNIvqkZI/QU21tp7y6jtraGWaaRtqRxIWZj6ADqa+stP0ea40GxElvd2TCFFMEkWGTAxggHANefiKlaCXsocz9bHVRhTk/3krL0ufJstpcQDMsEsY/2kI/nUNfU3ijwsw8OXrQW99fSvAy+TDb5c5GOASM4zn8K+YTaTR3wtJ43hmDhGSQbWU57g4x+NGHqVpp+1hyv1uOvCjBr2Uub5WK9FerXPwsuFtoJLXR7maOUZSUTBg35HFc54p8B6j4bsPtV3p81quVx5jryDx61oqi5rWZ59PEqbtyteqOMoor0O7+Gtjp9gZ7vxPZiYPsaFApKnvnLZ/SqcktzqSb2PPKK19e0RNHkh8m9jvIZQSskYxgjHHU+orNgt5rlykMbOwGSB6U076oGraEVFXBpV8wJW2kOOuBVQAswUAkngAd6YhKK0BoOsFdw0q+K+ot3x/Kqk9tPayeXcQyRP/dkUqfyNSpxeiY7MioooqhBRRRQAUUUUAFFFFABRWn4d0d9f8Q2OlJIsZuZQm9uijqT+QNfQn/CivCVrZCaWW6lJGQXnIB/IUAfNFKqs7hVBZicAAck19DW/wf8ACdxL5eJEOcf8fLf4Vnah8MNI0jV1/s+Qo6Bm3ysWUADJOPXApO/QqEU5Wk7LuYfhy7urXRrezntUjMSbRhiT9TzjNTTanJDId8asPYmurt/C8V5bDydTtgwQsVELkgduRkDPYZyaxdU8HzwhlGpQy7WIZUibjHWn7TGLS7OpYTJ3q4pvv1OG0jVbnSviGuuNp0c2xiwHmEIuV27s+o64r0q6+K0JDiFBJj7v+j4z+b1yt/FHpNlb2ck4VHbfIxh+631xS3uqaWdOaNNSic44VYsH8eKznOW/U2wuEoSdnpHp/VjXt/iAdSvo4HiaJW+8ViBP4YavR7Wx03TtOH2azdZp23uxTBZj16dST9a8D0i8iTV4WVwnOASM5r28XpMETRzuJkwxdh/F7cV5uNputGKul69ur/rX8TacIYeq407teX5Fi5MtsxjkliikwT5TTKH6Z+7nOfauI8Sy2euWq2E0K3LSyeVGZht8tvUE8iuy/tF1kuZUFus9yCs0gtzl+MeuP0rzrxdAbdbID7puCQe/IJrOOBwa96m/eW2rOPF4zFQoy6adkdt4O8KW3hm3ZbO+mjYgF2ilCB+O+OT+NaN+dQZmaDV71SehF32/OuU0BIPs8gMKk+XwcU/RdL8Oa1eNb23h+/njhXdcXVzeiJI1HVmCg46Hgc11atK3XzPkcNiXirwSs/V3/ITWNd8QaDb+YNVv33MFRTcA5JOAPzNeYeItPFpqUt5raRyX87eY0MLALyepYdT64rutcsLL/hJ9ObSNFNrpKSoEmkyWnJwQxDEkDBXA98nrxn+OYkW5hnkXcWG1Vzjp1J74ruw1CKpupOX6ntYXCVaVX2dm5PuzjbSXT/mIsUBOMEMcL+FFzc2HlbGsPMYE/NuI+nStjQLHUNZ1BLXTbKKaQnkeX8qD1Y9hXoGueFNO0O8sLaO8SW5dFe7tycBQWVdynOQMtwD9avDYSjXqWU2n6f8ABPUx9Wvg4LmjF36J6/keYeFNduPDOqyajpkR8oDM8ROJAnfa45/DpXvFj4lGs6fFe2moyhJEDLmbH6ZrkLiygt7mWFItkbQZ2NyT2OQefwPSqWiXlmWtLCKxuJWjkJliIVIplJ27A38IBIz+PI78ud5PN0ozpVLO/p09Wc+BzSmptVo6ff1+R3Zv9RRiY9TmPt5+f61ianpOmavqMOqavZW19cwEczkHeB2bB+YfXNUdtzeXBittDtLEvu2ZuywQ8bQ5JIPXB6fhV+C3jEMnnIuApC+T90N3GcdK+UqUsThmm6v4n09GeHxF0oP5xseiacmnano8QisLdLfb8sQTaq/QDp+FQ6t4b0TWrUWuq6NZXMQGF3odyD/ZbOV/A1zXhvxLeW1jDbnTY1t1uWgM7S8CJYywcqOeTgf/AF66DSNfvL+5igubJYTJLIhyHRlVVVgSrDgnPTJ4x9K+spuXsYzk97fifLYlwhWlCOydjw7x18GJ/D7nVNHuHudJ3bpExmW3H/sy/wC127+tU10SW80+e4vLdmeYh2aQHLEDAb6+/U19C+K9y6KyK7KJDsbacHB61weq2OjrpSIy3DTK20gvLtAx69MdvqRTqSkloedjKVerZUpWPDtR0yWa3W3SVlWJmdYyx2ZPU47E4HPsK63wL8N7i5tRqF5fW8KTLhYlO5gPc9B9Oa2rfQ9NvdRENtE4YrkiRnXHzDPX2zXUxTWXhn/QlSYIfmAUA4yW6ngdFJ/A1hXxc4UnKnG8l0NoU61lGpLTutzOHwxtUjcQ6mBI33S3IB+leaXPhDVvAvinT9QdILy2iuVkilQ/KzKc7SOoPt+tewHxVYq+BFdt3ysX+JFQ+Idasb7SpYTa3WZIw8eYwN2COhz1rhoZhiqytVo2XzNo0409YzuQxeKNauLVJprQMxT7qyLnP07V5h8QLzV9fe1FzY7HshIfl+8VYg5x3AA7epr13QIdPTTIidEvJJGI5+Y/nU8+h2F5LC1xaNuZt6RzRlXQA+o/ziuPDx+qV+ZwXke/WVKrQVk0/l/mfLNFd7c6ZpL+Mdat3s4ZYIriTaySNGo56AA1iSHREuZF/s6TYucYkb/4qvp4S54qS6niNWdjnaK7TT9B0/UrbWLVrOS21C0geWMiYlQVG4qwOewI+tcXTEFFFFABRRRQB0/w6bb8QdFP/TwB+hr2jxl8RL+K7k0fTUSGO2PlyTOu5mYdcA8AV4t8Pf8AkoGh+92gr37XPC+k6tO2oRKi3uB5okVijHpkqCOeOufwo5W9jtwFbDUajniI8ytovP52OH0XWPF2r6mtvpl1NNOTzhF2qPViRgD3Ndr4mmOh3enRatdLcXbxHzWRNu7pu4HIByQDVa0tfEsKG1sdVs7G36bbWERfyXJP41keI9BXTsz3F5LfX0iZeaXPH0ySfxNaOnGlHn50303HicbDG1Y04UeSHyT/AANzUPE9lFo5j0eGK2mlbdIXQtk4+9zxu6cnmuQh8WXkMkpvrqPBzkpHkn8qrRxg2wc9ccmsa8TO4k968/6xNyvc9V5fQjTcFG/n1O41DwxeX8EV1/a3kwyRb5C5KrtIz2HSsa+8PxJayR/8JE48tQSHL7eemAVBP4VejutTeztbdbjdbtAqmNiuNoHv/kVJqsd62nsjuzHGAxeNz17FskdPWuyFXDP47/1955iwmOh/Da/D/gHAx6TZtKPJ1+2aRDuGYnxkfUY/OvW7aW5+xQCaRDJsAcR8DOOce1cBPLqV1C6Fi+4NE0W5FV8HBDBQATk9zzXe6VHcQabEL11luI0AdwMbm7Af57V4HEPsJQh7LzPTy5YqMpfWF+RKBlx8ufb1rmvGtrJONMht4vMla4BCqOfun/Gukz83FU/EtsZ9HivoWIa0cM23hgOhP5YP4V4eWtKsPPlN4KfKV9L0fVYQSbCb7mMYH+NX5LnVLPwTNoGmeHLuGW4hKz3LOuWdvvMAPUZA56VoaY322wSUNI5K7gQcnmq1/ayqjH993PUV9SpOMdD84oUlhr1Kd9fT/I4ef+2rTUbOTVTdLbJIpYzsCOBhf8Pyqh44v1jvrdLiPanlBlDjlSfTsfpWjr9l9qt2h8x1Y42tu+6a4LVNM1OXTYtVvLpZVbKrvkLMQDiu/B10qXI1e3c9XAYieIvJyfMtN9fvNiz8U3SQCCPXru0gH/LO1iEQ+vykc+9XbHxFp9nOJPtJJMqyTSSSMZJiDnlscc9v51xFrbzT/KgFJPZXSEhlrsp5l7N8qijuq5c6q5nJnrC+JtM1Oee4iu4wRDiQMQAMdxjoPatTwpdauNPeOBpH0y4b5lj2kMhOSQevP614taWDy2xf7QYmknjtwAcZ3Hr9BX0NpGlR6bo8FtACI40CjnsBXi8SZxNYeFOKs2/PZL/gndk2EjRrSm9dLa+t7/gQPHeTzuDbPFEV2twF3jPTapwBxU88d0DJOtudxXLlcAMfcfSiXKt3zVy5LJpkMKEh5mwMd6+LjOVRO/8AX4n1EnZxskanh/T47vRI45rcyRt85j8whQ3rjPWt+CwWK486O3ELFix2sduSAD8ucdBRpNl9j06ONdwAWpyW3gbj17mvuMPTUKceZa2R8diuSVeUo9WUPFQYaMzhCwjYOwHoK4TxV4ksrbTYEWCZ3XlhGwbHHf0rqfiLrQ0fw95SMRLdMIEx2z1P5A/nXm/iC3M+hwsSDuO7y0TAQ9xnP410tJxdzx8bipUZWi+35mJpviuA65A8djdtj5dvGTkj1NdNql7a6pdRXcUFymyJly6k4cBxggdQTgZz0J9K8/0UC21qJztjKvkEj/Oa9K0U7LRQcZCqDjjPGf61wYuqsPQ9rFa7G+FxUp1FzJNeZnxXMMUsciJNGTc8qLZ2+UHIbkE8AAfjWffzXjWbRtHcxxwwqQ7RMuMHH8Q9P512gcAjkj3rF8V3oGlSxGTa8zCFTnnnrj8q8uhmM6s7OP4np1sTKcVTSSV9krEWg65qf2VES9lwvYbf/iay/EfjTWYJUhg1GXa7BJFkVcAE46ha0NJ0mD7FG87CRsAMoOB+VZ+paPblZEsQoe/kQISc7docuv4lRXJRdN12mrq+3Q+kqU4Rw65YpOxzXhjTrTWb/UHkm/0tk86RxLktlsH5fxBz2warr4dh0rW47t4muxBOJPKaRdkmGBAY4zg9fyqHwdcSNqBjih8wSkbo1yGbB6AjkZrc8S2kWk6dfWumvL9quws7CSXe0Ecf34wwyCSxA5P8OOtfYy0Vkr9D5Xd3K+iLaNJ4guWlCXr2Vw8iCYNvZlY59uvT2ryqu48ItI/9qu7glrGYDPU/K1cPTEFFFFABRRRQB0fgBtvxA0A/9P0Q/wDHq+lLljbfaC3TOQnTI3Hn/P8AKvlbRdRk0jW7HUYoxLJazpMqE4DFSDivd4vjBo+o2kaX1le2Mo6gATL+BBB/SqUrEtXOssn8w70GRjODwa5bxhctLKyNGUKjHPemp8RfDMb7hdXD+wtmzWT4p+IehapaRW1raXkeGDNcSRqoOB02gk1lU1i7HThWlWjzdyFFxbAE9qyLsgRtgj8RTW8TaYYgq3QGAOqkZ/Ss6fXNOkGRcDn1U/4Vw8ktND6Z4ilZ+8vvPQr3VBaWWnrJZ2siNZxsjsoYk4AJI/CoReQ3UZtYbTTDcPwjzIwAP4dB7npXKr4u0wWtpGqwO0S7XMic49uRRd+JtJa3/wBHG2XHUOw/rXTKMpO7PKp1KUINKTT/AK7M6y203QLq0SF7XTp73/lr9kYlF9Opz071vsGWNBjauPlFeYeD9YifxFb2qxQxq6uNyOeTjIznrXqsw/dxgJJgDuc/0r5rPakvaRhskvzf/APSwFrOXM5XfUrd6lu5bWHw7qIvOI2iYfj2x75I/OmiNiR8p/KsPxDaTE200iO1rFKDKNpAAPQn8ePxrzcAv3yFnNV08HOSV2kaHhnU107T4IZgy/ICNzHjv/WluvElk0bKqtnn7vAz34qW2u9Pk095LcoxUcr0ZT6c96xbbUI5ZXJgZgWOVKg4/SvqHJpJJn5dOrOEVHm0KN9fwEGVx8o569K5K9gmvPBlpcF8WsJZYt3G4BsfjXUeLVt77RJvsj+VOflAK9T6DH+ea43xL4ijvbGxsrC3+z2kMQURHkgjjH55rrwqbjLU9bJkopu99SrpwkkYCFOvvTtSsL9fmZCqkdhis+z1CS0wytgirV/rU9zAqs+VHSs3Tmp3SPrFOm6VmxYIVXR4ppJNoivowTjoD1Ofwr3m31OI2igDPHUV882uomKxvLaRFkjuVGVb+Eg8N9a9Z8DzXKaDbJdF3YIMbuu3t+mK83P8NzUYVH0f5lZW4zqyja+lzpnuVLbivfODU51FJbyyLIQsbgE0xpoHUhxtI74pwt7f7O4lWVXYZQvkbvwxXzNGXK00tj3ZKFveX9M9DhvEa3Xap6UgmCyhyp4PSsjw3Kw05QJlm2/KWWTcMjqM+ta32mGaUwKQZxyY1YFseuOoHvX31KTnBN6HxFaKjUcU72Z518Y4p7mw0u9jVxDBclZABwNy8E/iMfjWQCstjblgGLR4+bnpXY/EnxFp+g+D7mK48sXtypgggfkuT3x6Ac5+leT23iyzis4VlhkL7emOn41li+Z0mo7nzedUakl+7TbZSvdtnq6SBAQD0xmu00dituoXaQY1Py9OmP6V59qV6l7cebDG+zr8wres/EVlpds73s0VszksIFGCBgdFHOOuK56lKdTCcjWqNMC3CKU9ztxI7EACuW8aJPJbQkblWOdGbjg896ZB40sFPnPcIIcbg4NR6x4x0e70yaH7bCfPj2BuW2c9SAOPavOw+Fq0al+U9KnWVSUbXun2L9ldMFEkXzq6gFR2IrE1q8u9Ovor/cAFuA8YPbjnd+lM0zVfD1vFGp16Iev7t+P/AB2qHiDVtHnCtDrEcu0/d8tyT+a4pUaE41vhdvRn3NbEUJYe11e3cxfChnh16b7KCLlJR5I64YN8o/PFbHiLxLpr217osCT2/wBmdo4pYD8k2Ou4ZBwWyeprC8Pa3pumalNeSfazK25lKKvynnB5Pbr+FZVzNpjyu8ct0dx6Mij+tfTq/Mm+x8nI3/CjxtBqaoH4spuS3IOw9fUZrhq6Cw1e20y1u/s0c0s88TRYkICqCCCeOSRnpXP1bEFFFFIAooooAkg4nj/3hWr5mQayEOHB9DVoT470AaCNg0y5ZmAz0qot0B1zTpbgOowaTGnZi0jDiovNoMuRUWNuZEpiQqpbgkZ6UGKJuFHP0oMisq5btigSKOQxB7cVWpGg2GBGkHLcfhWxFf30ChYb66jA7LO/+NZYuBgA5J9cU7zvesasebcuErG0viDW1GBrF8B6C4f/ABqnd6ne3JP2i9uZj/00mZv5mqXnUx3z8wPK81EKaT2CrK8Wb1t4o163sZbZNUukhkGGjD/Kw9xVaDxBqUC7UnIGMd6yxc8dKQT4PStXSg+h5sqFNqzijXh8SatZ3aXkV08csf3WXGV+meKxb/ULi/vpru4cvLMxdmIwWJ78cUTSGRCp4qOV1kjVsAMODVwgo7I2owjBWirEIdu1O8xgOgpVI70rlCODVXOi2gJdSp0PfPSujsPE+rQAtDdt83J3DNc0MbG4BJ4FXYSIowoNYV6cJr3lc3w9apTd4SaNyXxJrUtxHN9ukV4zlSnGPpRqviTXtZh8q91e8uE24KSPwR6cVj+b70vm+9YRowja0V9xrOvUnrKTfzL+k3uo6XEwsNTu7QOcusErIGP0BqKdZJbx7uWaaWdzlpXkYuT/AL2c1FHKAAKmEwrtSPPsU76Es/mb5CSByzkk+2TUBt32jDn3Ganu58lVHrk0M68HPak7mU3JbFUF4/lEjD6MRVmHcSxbO7POaryMGYACrETgJxSl8JUbvVkwAB6VBdOVjK+vFP8AMFQXLblB9DWcVqXYdGoVQBUc7A8DqDTllG3INRPIAQepBzTS946ZS0Iom2yFv0pHj2knIxnimqdrA9xSs/GB09K2OcRTjP0qKnE02mAUUUUAFFFFABS5pKKAHBjQWptFADtxo3Gm0UAP3n1o8w+tMooAfvPrS+aajoosBJ5ppTKcYqKilZBclWUgdaPNPrUVFMCTzDSbqZRQA7dRmm0UAP3VJ5/vUFFJpMLk/n0vnmq9FHKh3ZaFwfWnfaW9ap0ZpiJmlJfNOabIqvRQFiQPzkmpBMQMVXopWAs+e1MaYsMGoaKLICQSYFNLU2iiwXFzSUUUwCiiigAooooAKKKKACiiigAooooAXFGKKKAFxRiiigBMUuBRRQAYpCKKKADFLj5aKKAEIoxRRQAY4oxRRQAYoAoooAKSiigBcUYoooAMUYoooASiiigAooooAKKKKACiiigAooooAKKKKAP/2Q==" 
+             alt="Productos Pepsi CBC" 
+             style="height:44px;object-fit:contain;border-radius:8px;opacity:0.92;" />
+        <span class="logo-name">Solicitud de código Pepsi</span>
+      </div>
+      <div class="header-title">Cliente nuevo CBC</div>
+      <div class="header-sub">Completa la información de tu negocio</div>
+    </div>
+
+    <!-- STEPPER -->
+    <div class="stepper-wrap">
+      <div class="stepper">
+        <div class="step-item active" id="si1"><div class="step-dot">1</div><div class="step-label">Negocio</div></div>
+        <div class="step-item" id="si2"><div class="step-dot">2</div><div class="step-label">Fiscal</div></div>
+        <div class="step-item" id="si3"><div class="step-dot">3</div><div class="step-label">Documentos</div></div>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+    <div class="form-content">
+
+      <!-- STEP 1: NEGOCIO + UBICACIÓN -->
+      <div id="p1">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><div class="section-title">Datos del Negocio</div><div class="section-subtitle">Información básica de tu establecimiento</div></div>
+          </div>
+          <div class="field">
+            <label>Nombre del propietario <span class="req">*</span></label>
+            <input type="text" id="ownerName" placeholder="Ej. Juan Carlos Pérez" />
+            <div class="field-error" id="err-ownerName">⚠ Este campo es obligatorio</div>
+          </div>
+          <div class="field">
+            <label>Nombre del negocio <span class="req">*</span></label>
+            <input type="text" id="bizName" placeholder="Ej. Tienda La Bendición" />
+            <div class="field-error" id="err-bizName">⚠ Este campo es obligatorio</div>
+          </div>
+          <div class="field">
+            <label>Dirección completa <span class="req">*</span></label>
+            <input type="text" id="bizAddr" placeholder="Calle, número, colonia, municipio" />
+            <div class="field-error" id="err-bizAddr">⚠ Ingresa una dirección válida</div>
+          </div>
+          <div class="field">
+            <label>Teléfono de contacto <span class="req">*</span></label>
+            <input type="tel" id="bizPhone" placeholder="Ej. 7999-1234" />
+            <div class="field-error" id="err-bizPhone">⚠ Ingresa un teléfono válido (8 dígitos)</div>
+          </div>
+          <div class="field">
+            <label>Correo electrónico <span class="req">*</span></label>
+            <input type="email" id="bizEmail" placeholder="correo@negocio.com" />
+            <div class="field-error" id="err-bizEmail">⚠ Ingresa un correo electrónico válido</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+            <div><div class="section-title">Ubicación del Negocio</div><div class="section-subtitle">Toca el mapa para marcar tu local</div></div>
+          </div>
+          <button type="button" class="geo-btn" id="geoBtn" style="margin-bottom:12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#fff" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            <span id="geoBtnLabel">Ir a mi ubicación</span>
+          </button>
+          <div class="geo-status" id="geoStatus"></div>
+          <div id="mapContainer">
+            <div class="map-instruction" id="mapHint">📍 Toca el mapa para marcar tu negocio</div>
+          </div>
+          <div class="map-coords-bar">
+            <div class="map-coord-pill" id="latPill"><div class="map-coord-label">Latitud</div><div class="map-coord-val" id="latVal">—</div></div>
+            <div class="map-coord-pill" id="lngPill"><div class="map-coord-label">Longitud</div><div class="map-coord-val" id="lngVal">—</div></div>
+          </div>
+          <input type="hidden" id="geoLat" />
+          <input type="hidden" id="geoLng" />
+          <div class="field-error" id="err-geo">⚠ Marca la ubicación de tu negocio en el mapa</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: FISCAL -->
+      <div id="p2" class="hidden">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#fff" stroke-width="1.8"/><path d="M7 12h10M7 8h6M7 16h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <div><div class="section-title">Tipo de Facturación</div><div class="section-subtitle">Selecciona cómo recibirás tus facturas</div></div>
+          </div>
+          <div class="billing-options">
+            <label class="billing-opt">
+              <input type="radio" name="billingType" value="consumidor" id="billingCF" />
+              <div class="billing-card">
+                <div class="billing-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><circle cx="12" cy="8" r="4" stroke="#4a5a7a" stroke-width="1.8"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" stroke="#4a5a7a" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <div class="billing-card-label">Consumidor Final</div>
+                <div class="billing-card-desc">Requiere DUI</div>
+              </div>
+            </label>
+            <label class="billing-opt">
+              <input type="radio" name="billingType" value="creditofiscal" id="billingFC" />
+              <div class="billing-card">
+                <div class="billing-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><rect x="2" y="6" width="20" height="14" rx="2" stroke="#4a5a7a" stroke-width="1.8"/><path d="M2 10h20" stroke="#4a5a7a" stroke-width="1.8"/><path d="M6 15h4" stroke="#4a5a7a" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <div class="billing-card-label">Crédito Fiscal</div>
+                <div class="billing-card-desc">Requiere Tarjeta IVA</div>
+              </div>
+            </label>
+          </div>
+          <div class="field-error" id="err-billing" style="margin-top:10px;">⚠ Selecciona un tipo de facturación</div>
+        </div>
+      </div>
+
+      <!-- STEP 3: DOCUMENTOS -->
+      <div id="p3" class="hidden">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+            <div><div class="section-title">Documentos Requeridos</div><div class="section-subtitle">Adjunta los documentos correspondientes</div></div>
+          </div>
+
+          <!-- Documento fiscal (DUI / IVA) -->
+          <div class="doc-type-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/></svg>
+            <span id="docTypeLabel">—</span>
+          </div>
+          <div class="upload-area" id="uploadArea">
+            <input type="file" id="docFile" accept=".pdf,.jpg,.jpeg,.png" />
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#4a5a7a" stroke-width="1.8" stroke-linecap="round"/><polyline points="17,8 12,3 7,8" stroke="#4a5a7a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="#4a5a7a" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div class="upload-label">Toca para adjuntar documento</div>
+            <div class="upload-sublabel">PDF, JPG, JPEG o PNG · Máx. 5 MB</div>
+          </div>
+          <div class="file-preview" id="filePreview">
+            <div class="file-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="#fff" stroke-width="1.8"/></svg>
+            </div>
+            <div class="file-info">
+              <div class="file-name" id="fileName">—</div>
+              <div class="file-size" id="fileSize">—</div>
+            </div>
+            <button class="file-remove" type="button" id="fileRemoveBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="err-doc" style="margin-top:8px;">⚠ Debes adjuntar el documento requerido</div>
+
+          <!-- Separador -->
+          <div style="height:1px;background:var(--border);margin:20px 0;"></div>
+
+          <!-- Recibo de agua o luz -->
+          <div class="doc-type-badge" style="background:rgba(0,150,80,0.09);color:#00875a;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Recibo de agua o luz
+          </div>
+          <div class="upload-area" id="uploadAreaUtil" style="border-color:#b2dfc8;">
+            <input type="file" id="utilFile" accept=".pdf,.jpg,.jpeg,.png" />
+            <div class="upload-icon" style="background:#e6f4ea;">
+              <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#00875a" stroke-width="1.8"/><path d="M7 12h10M7 8h6M7 16h4" stroke="#00875a" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div class="upload-label">Adjuntar recibo de agua o luz</div>
+            <div class="upload-sublabel">PDF, JPG, JPEG o PNG · Máx. 5 MB</div>
+          </div>
+          <div class="file-preview" id="filePreviewUtil">
+            <div class="file-icon-wrap" style="background:linear-gradient(135deg,#00875a,#00c97a);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#fff" stroke-width="1.8"/></svg>
+            </div>
+            <div class="file-info">
+              <div class="file-name" id="fileNameUtil">—</div>
+              <div class="file-size" id="fileSizeUtil">—</div>
+            </div>
+            <button class="file-remove" type="button" id="fileRemoveBtnUtil">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="err-util" style="margin-top:8px;">⚠ Debes adjuntar el recibo de agua o luz</div>
+        </div>
+      </div>
+
+    </div><!-- /form-content -->
+
+    <!-- BUTTONS -->
+    <div class="submit-wrap">
+      <div style="display:flex;gap:10px;">
+        <button type="button" id="btnBack" class="btn-back hidden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" id="btnNext" class="btn-submit" style="flex:1;">
+          <div class="btn-shimmer"></div>
+          <span id="btnLabel">Continuar</span>
+          <svg id="btnArrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="spinner" id="btnSpinner"></div>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /mainForm -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---- STATE ----
+const S = { step:1, lat:'', lng:'', fileData:null, fileName:'', fileSize:'', utilData:null, utilName:'', utilSize:'' };
+
+// ---- DOM ----
+const panels   = [null,'p1','p2','p3'].map(id => id ? document.getElementById(id) : null);
+const stepInds = [null,'si1','si2','si3'].map(id => id ? document.getElementById(id) : null);
+const btnNext  = document.getElementById('btnNext');
+const btnBack  = document.getElementById('btnBack');
+const btnLabel = document.getElementById('btnLabel');
+const btnArrow = document.getElementById('btnArrow');
+const btnSpinner = document.getElementById('btnSpinner');
+
+// ---- TOAST ----
+function toast(msg, dur=3000){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+// ---- STEP NAV ----
+function goTo(n){
+  for(let i=1;i<=3;i++){
+    panels[i].classList.toggle('hidden', i!==n);
+    const el = stepInds[i];
+    el.classList.remove('active','done');
+    if(i < n) el.classList.add('done');
+    else if(i === n) el.classList.add('active');
+  }
+  btnBack.classList.toggle('hidden', n===1);
+  const last = n===3;
+  btnLabel.textContent = last ? 'Enviar solicitud' : 'Continuar';
+  btnArrow.innerHTML = last
+    ? '<path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    : '<path d="M9 18l6-6-6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+  if(n===3) updateDocBadge();
+  if(n===1){ setTimeout(()=>{ initMap(); map.invalidateSize(); }, 120); }
+  S.step = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateDocBadge(){
+  const b = document.querySelector('input[name="billingType"]:checked');
+  document.getElementById('docTypeLabel').textContent =
+    b ? (b.value==='consumidor' ? 'DUI requerido' : 'Tarjeta de IVA requerida') : '—';
+}
+
+// ---- VALIDATION ----
+function showErr(id, show, msg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('show', show);
+  if(msg) el.textContent = msg;
+}
+function markInput(id, err){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('error', err);
+}
+function validate(n){
+  let ok = true;
+  if(n===1){
+    const owner = document.getElementById('ownerName').value.trim();
+    const name  = document.getElementById('bizName').value.trim();
+    const addr  = document.getElementById('bizAddr').value.trim();
+    const phone = document.getElementById('bizPhone').value.trim();
+    const email = document.getElementById('bizEmail').value.trim();
+    const phoneOk = /^\d{4}-?\d{4}$|^\d{8}$/.test(phone.replace(/\s/g,''));
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if(!owner)   { showErr('err-ownerName',true); markInput('ownerName',true); ok=false; }
+    else         { showErr('err-ownerName',false); markInput('ownerName',false); }
+    if(!name)    { showErr('err-bizName',true); markInput('bizName',true); ok=false; }
+    else         { showErr('err-bizName',false); markInput('bizName',false); }
+    if(!addr)    { showErr('err-bizAddr',true); markInput('bizAddr',true); ok=false; }
+    else         { showErr('err-bizAddr',false); markInput('bizAddr',false); }
+    if(!phoneOk) { showErr('err-bizPhone',true); markInput('bizPhone',true); ok=false; }
+    else         { showErr('err-bizPhone',false); markInput('bizPhone',false); }
+    if(!emailOk) { showErr('err-bizEmail',true); markInput('bizEmail',true); ok=false; }
+    else         { showErr('err-bizEmail',false); markInput('bizEmail',false); }
+    // Validar ubicación también en paso 1
+    const lat = parseFloat(document.getElementById('geoLat').value);
+    const lng = parseFloat(document.getElementById('geoLng').value);
+    if(isNaN(lat)||isNaN(lng)) { showErr('err-geo',true); ok=false; }
+    else { showErr('err-geo',false); S.lat=lat; S.lng=lng; }
+  }
+  if(n===2){
+    const b = document.querySelector('input[name="billingType"]:checked');
+    if(!b) { showErr('err-billing',true); ok=false; }
+    else   { showErr('err-billing',false); }
+  }
+  if(n===3){
+    if(!S.fileData) { showErr('err-doc',true); ok=false; }
+    else            { showErr('err-doc',false); }
+    if(!S.utilData) { showErr('err-util',true); ok=false; }
+    else            { showErr('err-util',false); }
+  }
+  return ok;
+}
+
+// ---- MAP (Leaflet) ----
+let map, marker;
+const DEFAULT_LAT = 13.6929, DEFAULT_LNG = -89.2182; // El Salvador centro
+
+function initMap(){
+  if(map) return; // ya inicializado
+  map = L.map('mapContainer', { zoomControl:true, attributionControl:false })
+         .setView([DEFAULT_LAT, DEFAULT_LNG], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19
+  }).addTo(map);
+
+  // Icono personalizado
+  const pinIcon = L.divIcon({
+    className:'',
+    html:`<div style="width:36px;height:36px;background:linear-gradient(135deg,#0a4fc4,#1a6eff);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(10,79,196,0.5);border:3px solid #fff;"></div>`,
+    iconSize:[36,36],
+    iconAnchor:[18,36],
+    popupAnchor:[0,-36]
+  });
+
+  // Click en mapa coloca pin
+  map.on('click', e => placePin(e.latlng.lat, e.latlng.lng));
+
+  // Forzar render correcto al hacerse visible
+  setTimeout(()=>map.invalidateSize(), 100);
+}
+
+function placePin(lat, lng){
+  if(marker) map.removeLayer(marker);
+  const pinIcon = L.divIcon({
+    className:'',
+    html:`<div style="width:36px;height:36px;background:linear-gradient(135deg,#0a4fc4,#1a6eff);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(10,79,196,0.5);border:3px solid #fff;"></div>`,
+    iconSize:[36,36], iconAnchor:[18,36]
+  });
+  marker = L.marker([lat,lng], {icon:pinIcon, draggable:true}).addTo(map);
+  marker.on('dragend', e => {
+    const p = e.target.getLatLng();
+    updateCoords(p.lat, p.lng);
+  });
+  map.panTo([lat,lng]);
+  updateCoords(lat, lng);
+  document.getElementById('mapContainer').classList.add('has-pin');
+  document.getElementById('mapHint').textContent = '✓ Arrastra el pin para ajustar la posición';
+  document.getElementById('mapHint').style.background = 'rgba(0,150,80,0.82)';
+}
+
+function updateCoords(lat, lng){
+  const la = parseFloat(lat).toFixed(6);
+  const ln = parseFloat(lng).toFixed(6);
+  document.getElementById('geoLat').value = la;
+  document.getElementById('geoLng').value = ln;
+  document.getElementById('latVal').textContent = la;
+  document.getElementById('lngVal').textContent = ln;
+  document.getElementById('latPill').classList.add('active');
+  document.getElementById('lngPill').classList.add('active');
+  S.lat = la; S.lng = ln;
+  showErr('err-geo', false);
+}
+
+// Inicializar mapa cuando se llega al paso 2
+const _origGoTo = goTo;
+
+// Botón GPS
+document.getElementById('geoBtn').addEventListener('click', function(){
+  const status = document.getElementById('geoStatus');
+  const btnLbl = document.getElementById('geoBtnLabel');
+  this.disabled = true;
+  btnLbl.textContent = 'Localizando...';
+  status.className = 'geo-status warn';
+  status.textContent = '⏳ Obteniendo tu ubicación...';
+
+  if(!navigator.geolocation){
+    status.className = 'geo-status error';
+    status.textContent = '✖ Toca el mapa directamente para marcar tu negocio.';
+    this.disabled = false; btnLbl.textContent = 'Ir a mi ubicación'; return;
+  }
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    map.setView([lat,lng], 17);
+    placePin(lat, lng);
+    status.className = 'geo-status success';
+    status.textContent = '✓ Mapa centrado en tu ubicación. Ajusta el pin si es necesario.';
+    this.disabled = false; btnLbl.textContent = 'Ir a mi ubicación';
+  }, err => {
+    let msg = '✖ No se pudo obtener tu ubicación. Toca el mapa para marcar tu negocio.';
+    if(err.code===1) msg = '✖ Permiso denegado. Toca el mapa para ubicar tu negocio.';
+    status.className = 'geo-status error';
+    status.textContent = msg;
+    this.disabled = false; btnLbl.textContent = 'Reintentar';
+  }, {enableHighAccuracy:true, timeout:12000, maximumAge:0});
+});
+
+// Sync manual inputs to state
+// (los inputs son hidden, se manejan vía placePin/updateCoords)
+
+// ---- FILE UPLOAD ----
+const docFile    = document.getElementById('docFile');
+const filePreview= document.getElementById('filePreview');
+const uploadArea = document.getElementById('uploadArea');
+
+docFile.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0], 'fiscal'); });
+document.getElementById('fileRemoveBtn').addEventListener('click', () => {
+  docFile.value=''; S.fileData=null; S.fileName=''; S.fileSize='';
+  filePreview.classList.remove('show');
+  uploadArea.style.display='';
+});
+uploadArea.addEventListener('dragover', e=>{e.preventDefault();uploadArea.classList.add('drag');});
+uploadArea.addEventListener('dragleave', ()=>uploadArea.classList.remove('drag'));
+uploadArea.addEventListener('drop', e=>{
+  e.preventDefault(); uploadArea.classList.remove('drag');
+  if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0], 'fiscal');
+});
+
+// ---- UPLOAD RECIBO ----
+const utilFile        = document.getElementById('utilFile');
+const filePreviewUtil = document.getElementById('filePreviewUtil');
+const uploadAreaUtil  = document.getElementById('uploadAreaUtil');
+
+utilFile.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0], 'util'); });
+document.getElementById('fileRemoveBtnUtil').addEventListener('click', () => {
+  utilFile.value=''; S.utilData=null; S.utilName=''; S.utilSize='';
+  filePreviewUtil.classList.remove('show'); uploadAreaUtil.style.display='';
+});
+uploadAreaUtil.addEventListener('dragover', e=>{e.preventDefault();uploadAreaUtil.classList.add('drag');});
+uploadAreaUtil.addEventListener('dragleave', ()=>uploadAreaUtil.classList.remove('drag'));
+uploadAreaUtil.addEventListener('drop', e=>{
+  e.preventDefault(); uploadAreaUtil.classList.remove('drag');
+  if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0], 'util');
+});
+
+function processFile(f, tipo){
+  const allowed=['application/pdf','image/jpeg','image/jpg','image/png'];
+  const errId = tipo==='fiscal' ? 'err-doc' : 'err-util';
+  if(!allowed.includes(f.type)){ showErr(errId,true,'⚠ Formato no permitido. Usa PDF, JPG o PNG'); return; }
+  if(f.size > 5*1024*1024){ showErr(errId,true,'⚠ El archivo supera el máximo de 5 MB'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    if(tipo==='fiscal'){
+      S.fileData=ev.target.result; S.fileName=f.name; S.fileSize=(f.size/1024).toFixed(0)+' KB';
+      document.getElementById('fileName').textContent=f.name;
+      document.getElementById('fileSize').textContent=S.fileSize;
+      filePreview.classList.add('show'); uploadArea.style.display='none';
+      showErr('err-doc',false);
+    } else {
+      S.utilData=ev.target.result; S.utilName=f.name; S.utilSize=(f.size/1024).toFixed(0)+' KB';
+      document.getElementById('fileNameUtil').textContent=f.name;
+      document.getElementById('fileSizeUtil').textContent=S.utilSize;
+      filePreviewUtil.classList.add('show'); uploadAreaUtil.style.display='none';
+      showErr('err-util',false);
+    }
+    toast('✓ Documento adjuntado correctamente');
+  };
+  r.readAsDataURL(f);
+}
+
+// ---- NAVIGATION ----
+btnNext.addEventListener('click', ()=>{
+  if(!validate(S.step)) return;
+  if(S.step < 3) goTo(S.step+1);
+  else submitForm();
+});
+btnBack.addEventListener('click', ()=>{ if(S.step>1) goTo(S.step-1); });
+
+// ---- SUBMIT via Formspree ----
+const ENDPOINT = '/api/enviar';
+
+async function submitForm(){
+  btnNext.disabled=true;
+  btnSpinner.style.display='block';
+  btnLabel.textContent='Enviando...';
+  btnArrow.style.display='none';
+
+  const owner   = document.getElementById('ownerName').value.trim();
+  const name    = document.getElementById('bizName').value.trim();
+  const addr    = document.getElementById('bizAddr').value.trim();
+  const phone   = document.getElementById('bizPhone').value.trim();
+  const email   = document.getElementById('bizEmail').value.trim();
+  const lat     = document.getElementById('geoLat').value.trim();
+  const lng     = document.getElementById('geoLng').value.trim();
+  const billing = document.querySelector('input[name="billingType"]:checked').value;
+  const bLabel  = billing==='consumidor' ? 'Consumidor Final' : 'Crédito Fiscal';
+  const docLbl  = billing==='consumidor' ? 'DUI' : 'Tarjeta de IVA';
+  const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+  const now     = new Date().toLocaleString('es-SV',{dateStyle:'long',timeStyle:'short'});
+  const ref     = 'SOL-' + Date.now().toString().slice(-8);
+
+  // Usar FormData para enviar archivos adjuntos reales
+  const fd = new FormData();
+  fd.append('referencia',          ref);
+  fd.append('nombre_propietario',  owner);
+  fd.append('nombre_negocio',      name);
+  fd.append('direccion',           addr);
+  fd.append('telefono',            phone);
+  fd.append('correo_negocio',      email);
+  fd.append('latitud',             lat);
+  fd.append('longitud',            lng);
+  fd.append('link_mapa',           mapsUrl);
+  fd.append('tipo_facturacion',    bLabel);
+  fd.append('documento_requerido', docLbl);
+  fd.append('fecha_registro',      now);
+
+  // Adjuntar archivos reales — con validación previa
+  const MAX_MB = 4;
+  const ALLOWED = ['image/jpeg','image/png','image/webp','application/pdf'];
+  const docFileEl  = document.getElementById('docFile');
+  const utilFileEl = document.getElementById('utilFile');
+
+  for(const [el, label] of [[docFileEl,'documento fiscal'],[utilFileEl,'recibo']]){
+    const f = el.files[0];
+    if(!f) continue;
+    if(f.size > MAX_MB*1024*1024){
+      resetButton();
+      toast(`⚠ El ${label} supera ${MAX_MB}MB. Comprime e intenta de nuevo.`);
+      return;
+    }
+    if(!ALLOWED.includes(f.type)){
+      resetButton();
+      toast(`⚠ El ${label} debe ser JPG, PNG, WEBP o PDF.`);
+      return;
+    }
+  }
+  if(docFileEl.files[0])  fd.append('archivo_fiscal', docFileEl.files[0], docFileEl.files[0].name);
+  if(utilFileEl.files[0]) fd.append('archivo_recibo', utilFileEl.files[0], utilFileEl.files[0].name);
+
+  function resetButton(){
+    btnNext.disabled=false;
+    btnSpinner.style.display='none';
+    btnLabel.textContent='Enviar solicitud';
+    btnArrow.style.display='';
+  }
+
+  try {
+    const res = await fetch(ENDPOINT, { method:'POST', body: fd });
+    const json = await res.json().catch(()=>({}));
+
+    if(res.ok && json.ok === true){
+      document.getElementById('mainForm').style.display='none';
+      document.getElementById('successScreen').classList.add('show');
+      document.getElementById('refNumber').textContent = ref;
+    } else {
+      const msg = json.error || `Error ${res.status}`;
+      console.error('Backend:', msg);
+      resetButton();
+      toast(`⚠ ${msg}`);
+    }
+  } catch(err){
+    console.error(err);
+    resetButton();
+    toast('⚠ Error de conexión. Intenta de nuevo.');
+  }
+}
+
+// ---- INIT ----
+goTo(1);
+</script>
+</body>
+</html>
